@@ -101,6 +101,31 @@ function parseCoachScoreText(text: string): { title: string; content: string }[]
   return segments;
 }
 
+async function copyToClipboard(text: string): Promise<boolean> {
+  if (!text?.trim()) return false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // 非 HTTPS 等环境下可能失败，走 fallback
+  }
+  try {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.left = "-9999px";
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function HomePage() {
   const [mode, setMode] = useState<Mode>("translate");
   const [rawText, setRawText] = useState("");
@@ -115,6 +140,7 @@ export default function HomePage() {
   const [train, setTrain] = useState<TrainState>({});
   const [isDemo, setIsDemo] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [answerDraft, setAnswerDraft] = useState("");
 
@@ -499,11 +525,20 @@ export default function HomePage() {
                           <button
                             type="button"
                             className="copy-btn"
-                            onClick={() => {
-                              if (result.optimizedText) {
-                                navigator.clipboard.writeText(result.optimizedText);
+                            onClick={async () => {
+                              const text = result?.optimizedText ?? "";
+                              if (!text) return;
+                              const ok = await copyToClipboard(text);
+                              if (ok) {
                                 setCopied(true);
-                                setTimeout(() => setCopied(false), 1500);
+                                setToastMessage("复制成功");
+                                setTimeout(() => {
+                                  setCopied(false);
+                                  setToastMessage(null);
+                                }, 1500);
+                              } else {
+                                setToastMessage("复制失败，请手动选择文字复制");
+                                setTimeout(() => setToastMessage(null), 2000);
                               }
                             }}
                           >
@@ -642,6 +677,11 @@ export default function HomePage() {
           </aside>
         </div>
       </div>
+      {toastMessage && (
+        <div className="toast" role="status">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
