@@ -118,11 +118,29 @@ export default function HomePage() {
   const [answerDraft, setAnswerDraft] = useState("");
 
   const [stats, setStats] = useState<Stats>(() => loadStats());
+  const [loadingTip, setLoadingTip] = useState(0);
+
+  const LOADING_TIPS = [
+    "正在理解你的情绪…",
+    "沟通教练在帮你润色～",
+    "把刺耳的话翻译成好听的…",
+    "马上就好，深呼吸～",
+    "在找更温和的说法…",
+    "快好了，别急～"
+  ];
 
   useEffect(() => {
     const loaded = loadStats();
     setStats(loaded);
   }, []);
+
+  useEffect(() => {
+    if (!loading) return;
+    const t = setInterval(() => {
+      setLoadingTip(i => (i + 1) % LOADING_TIPS.length);
+    }, 2500);
+    return () => clearInterval(t);
+  }, [loading]);
 
   const currentLevel = useMemo(() => getLevel(stats.points), [stats.points]);
 
@@ -232,12 +250,12 @@ export default function HomePage() {
         throw new Error(msg);
       }
       if (!data) throw new Error("返回异常，请重试。");
-           if (!data) throw new Error("返回异常，请重试。");
       const payload = data as CoachResponse;
       if (payload._demo) setIsDemo(true);
       setTrain(prev => ({
         ...prev,
         question: payload.trainQuestion ?? undefined,
+        lastScoreText: undefined
       }));
       setAnswerDraft("");
       const nextPoints = stats.points + 5;
@@ -415,7 +433,16 @@ export default function HomePage() {
             </div>
 
             <div className="result-card">
-              {mode === "translate" ? (
+              {loading ? (
+                <div className="loading-block">
+                  <div className="loading-dots">
+                    <span className="loading-dot" />
+                    <span className="loading-dot" />
+                    <span className="loading-dot" />
+                  </div>
+                  <p className="loading-tip">{LOADING_TIPS[loadingTip]}</p>
+                </div>
+              ) : mode === "translate" ? (
                 <>
                   <div className="section-title">
                     好好说话版建议表达
