@@ -178,17 +178,18 @@ export default function HomePage() {
         throw new Error("AI 返回内容异常，请稍后再试。");
       }
 
-      if (data._demo) setIsDemo(true);
-      if (data.translate) setResult(data.translate);
+      const payload = data as CoachResponse;
+      if (payload._demo) setIsDemo(true);
+      if (payload.translate) setResult(payload.translate);
 
       // 更新训练信息
       setTrain(prev => ({
         ...prev,
-        question: data.trainQuestion ?? prev.question,
-        lastScoreText: data.trainScoreText ?? prev.lastScoreText
+        question: payload.trainQuestion ?? prev.question,
+        lastScoreText: payload.trainScoreText ?? prev.lastScoreText
       }));
 
-      if (requestedMode === "train" && data.trainQuestion) {
+      if (requestedMode === "train" && payload.trainQuestion) {
         // 刚出题时清空答案与评分
         setAnswerDraft("");
       }
@@ -231,11 +232,12 @@ export default function HomePage() {
         throw new Error(msg);
       }
       if (!data) throw new Error("返回异常，请重试。");
-      if (data._demo) setIsDemo(true);
+           if (!data) throw new Error("返回异常，请重试。");
+      const payload = data as CoachResponse;
+      if (payload._demo) setIsDemo(true);
       setTrain(prev => ({
         ...prev,
-        question: data.trainQuestion ?? undefined,
-        lastScoreText: undefined
+        question: payload.trainQuestion ?? undefined,
       }));
       setAnswerDraft("");
       const nextPoints = stats.points + 5;
