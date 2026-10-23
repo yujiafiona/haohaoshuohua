@@ -3,17 +3,17 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "好好说话 · AI沟通助手",
-  description: "让情绪被理解，而不是被放大。基于《非暴力沟通》《关键对话》的 AI 沟通训练助手，情绪翻译 + 场景练习 + 功德成长。",
+  description: "给重要对话，留一点准备时间。基于《非暴力沟通》《关键对话》的 AI 沟通练习室，支持表达改写与场景练习。",
   openGraph: {
     title: "好好说话 · AI沟通助手",
-    description: "让情绪被理解，而不是被放大。非暴力沟通 AI 训练助手。",
+    description: "把想说的话，说得更好。表达改写与场景练习。",
     locale: "zh_CN",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "好好说话 · AI沟通助手",
-    description: "让情绪被理解，而不是被放大。",
+    description: "给重要对话，留一点准备时间。",
   },
 };
 
