@@ -153,6 +153,15 @@ export default function HomePage() {
     const timer = setTimeout(() => { setToast(""); setCopied(false); }, 2400);
     return () => clearTimeout(timer);
   }, [toast]);
+  useEffect(() => {
+    // A result only belongs to the exact input and settings that generated it.
+    setResult(null);
+    setResultContext(null);
+    setStreamingText("");
+    setResultDemo(false);
+    setCopied(false);
+    setError("");
+  }, [rawText, targetRole, scenario, profile]);
   const award = () => setPoints(previous => {
     const next = previous + 5;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ points: next })); } catch { /* Keep the successful result usable. */ }
@@ -251,7 +260,7 @@ export default function HomePage() {
               <p className="suggested-text">{streamingText || result?.optimizedText}{pending === "translate" && <span className="stream-cursor" />}</p>
               {pending === "translate" ? <p className="stream-status">表达先给你，分析正在补充…</p> : result && <>
                 <div className="result-actions"><button type="button" className="copy-button" onClick={async () => { const success = await copyText(result.optimizedText); setCopied(success); setToast(success ? "表达已复制，可以按你的语气再调整" : "暂时无法复制，请长按或选中文字复制"); }}><Icon name={copied ? "check" : "copy"} />{copied ? "已复制" : "复制这段话"}</button><span>带着自己的语气使用</span></div>
-                {resultDemo && <p className="demo-notice">当前展示预设示例，用于体验流程。</p>}
+                {resultDemo && <p className="demo-notice">当前按对象和场景展示预设示例；连接 AI 后，才会根据原话和背景实时改写。</p>}
                 {(result.explanation || result.theoryTips) && <div className="insight"><span className="insight-icon"><Icon name="leaf" /></span><div><h3>表达小贴士</h3><p>{result.explanation || result.theoryTips}</p>{result.explanation && result.theoryTips && <p>{result.theoryTips}</p>}</div></div>}
                 <details className="analysis-details"><summary>看看表达分析<span>四个维度<span aria-hidden="true">↗</span></span></summary><div className="score-grid">{[{ label: "情绪强度", value: result.angerScore, note: "越低越平和", className: "warm" }, { label: "攻击性", value: result.attackScore, note: "越低越少指责", className: "warm" }, { label: "共情度", value: result.empathyScore, note: "越高越能照顾感受", className: "green" }, { label: "清晰度", value: result.clarityScore, note: "越高越明确", className: "green" }].map(item => <div className="score-item" key={item.label}><div><span>{item.label}</span><strong>{item.value}<small>/100</small></strong></div><div className={"score-track " + item.className}><span style={{ width: Math.max(0, Math.min(100, item.value)) + "%" }} /></div><small>{item.note}</small></div>)}</div><p className="analysis-note">AI 评分仅作练习参考。</p></details>
               </>}
